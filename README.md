@@ -44,12 +44,12 @@ Copy config/barmaid.yml.sample to config/barmaid.yml and change it to your needs
         "recover_job": 'RecoverJobHost3'
 </pre>
 
-"jobs": (optional) the path to your custom recover jobs. all *.rb files in this path will be loaded on startup</br>
-"servers": (required) a list of servers in barman terms (should be equivalent to `barman list-server`)</br>
-"target": (required) a descriptive name for a target (or destination), has to be unique to a server (e.g. 'localhost')</br>
-"path": (required) filesystem path where the recover backup should be placed. when 'remote_ssh_cmd' is given, path is meant to be on the remote host, otherwise local</br>
-"remote_ssh_cmd": (optional) the recover will be done over ssh (same as 'barman recover --remote-ssh-command')</br>
-"recover_job_name": (optinal) a custom recover job script can be used for a target, for example to prepare several things before or after the recover. when not set, the default recover job will be triggered, which does just a 'barman recover'</br>
+* "jobs": (optional) the path to your custom recover jobs. all *.rb files in this path will be loaded on startup
+* "servers": (required) a list of servers in barman terms (should be equivalent to `barman list-server`)
+* "target": (required) a descriptive name for a target (or destination), has to be unique to a server (e.g. 'localhost')
+* "path": (required) filesystem path where the recover backup should be placed. when 'remote_ssh_cmd' is given, path is meant to be on the remote host, otherwise local</br>
+* "remote_ssh_cmd": (optional) the recover will be done over ssh (same as 'barman recover --remote-ssh-command')
+* "recover_job_name": (optinal) a custom recover job script can be used for a target, for example to prepare several things before or after the recover. when not set, the default recover job will be triggered, which does just a 'barman recover'
 
 ## API
 
@@ -94,12 +94,9 @@ Example:
 ```json
 {
   "path": "/var/lib/barman/recover/127.0.0.1",
-  "remote_ssh_cmd": "ssh barman@127.0.0.1"
-  "ts_backup_label_old": "2013-03-22 07:25:14 +0100" # not yet implemented
+  "remote_ssh_cmd": "ssh barman@127.0.0.1",
 }
 ```
-
-"ts_backup_label_old" shows (afaik) the timestamp of the last database backup on the target (not yet implemented)
 
 ### GET /api/servers/id/backups
 
