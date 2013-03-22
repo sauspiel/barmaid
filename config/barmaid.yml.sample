@@ -1,0 +1,18 @@
+"jobs": '/var/lib/barman/barmaid/jobs'
+"servers":
+  "backup1":
+    "targets": 
+      "localhost":
+        "path": '/var/lib/barman/recover/backup1'
+      "host2":
+        "path": '/var/lib/postgresql/9.2/main'
+        "remote_ssh_cmd": 'ssh postgres@host2.sample.com'
+        "recover_job_name": 'RecoverJobHost2'
+  "backup2":
+    "targets": 
+      "localhost":
+        "path": '/var/lib/barman/recover/backup2'
+      "host3":
+        "path": '/var/lib/postgresql/9.2/main'
+        "remote_ssh_cmd": 'ssh postgres@host3.sample.com'
+        "recover_job_name": 'RecoverJobHost3'
