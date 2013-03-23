@@ -2,6 +2,7 @@ require 'json'
 require 'sinatra/base'
 require 'sinatra/reloader'
 require 'sinatra/jsonp'
+require 'barmaid'
 
 module Barmaid
   class BarmaidApp < Sinatra::Base
