@@ -22,7 +22,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "rbarman", "~> 0.0.5"
   spec.add_dependency "sinatra", "~> 1.4.2"
   spec.add_dependency "sinatra-jsonp"
-  spec.add_dependency "resque-loner"
+  spec.add_dependency "resque-queue-lock"
   spec.add_dependency "log4r"
   spec.add_dependency "mixlib-shellout", "~> 1.1.0"
   spec.add_dependency "resque", "~> 1.23.1"

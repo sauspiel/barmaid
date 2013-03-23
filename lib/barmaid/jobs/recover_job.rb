@@ -1,9 +1,10 @@
 require 'mixlib/shellout'
+require 'resque/plugins/queue/lock'
 
 module Barmaid
   module Job
     class RecoverJob
-      include ::Resque::Plugins::UniqueJob
+      extend Resque::Plugins::Queue::Lock
 
       @queue = 'recover_job_queue'
 
@@ -40,7 +41,7 @@ module Barmaid
       # @option params [Hash] :job_opts job specific options (see {#perform!})
       # @return [void]
       def self.perform(params)
-        sym_params = params.inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}
+        sym_params = RecoverJob.hash_strings_to_sym(params)
         backup = RBarman::Backup.by_id(sym_params[:server], sym_params[:backup_id], {:with_wal_files => true})
         raise "No backup with id #{sym_params[:backup_id]} for server #{sym_params[:server]} found!" if backup.nil?
 
@@ -57,6 +58,10 @@ module Barmaid
           Logger.log('RecoverJob').error(e.backtrace.join("\n"))
           raise e
         end
+      end
+
+      def self.hash_strings_to_sym(hash)
+        return hash.inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}
       end
 
       # creates a RecoverJob or a subclass of it

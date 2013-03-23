@@ -8,6 +8,9 @@ module Barmaid
   class BarmaidApp < Sinatra::Base
     helpers Sinatra::Jsonp
 
+    configure do 
+      enable :logging
+    end
     configure :test do
       set :raise_errors, true
       set :dump_errors, false
