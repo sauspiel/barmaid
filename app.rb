@@ -8,6 +8,12 @@ module Barmaid
   class BarmaidApp < Sinatra::Base
     helpers Sinatra::Jsonp
 
+    configure :test do
+      set :raise_errors, true
+      set :dump_errors, false
+      set :show_exceptions, false 
+    end
+
     configure :development do
       register Sinatra::Reloader
     end
@@ -61,14 +67,11 @@ module Barmaid
     end
 
     post '/api/recover_jobs' do
-      data = JSON.parse(request.body.read, :symbolize_names => true)
+      halt(400) if params.empty?
+      data = JSON.parse(request.body.read.to_s, :symbolize_names => true)
       opts = {:by_configuration => true}
       opts.merge!(data)
-      if Resque.enqueued?(Barmaid::Job::RecoverJob, opts)
-        jsonp("existed")
-      else
-        jsonp Resque.enqueue(Barmaid::Job::RecoverJob, opts)
-      end
+      jsonp Resque.enqueue(Barmaid::Job::RecoverJob, opts)
     end
   end
 end

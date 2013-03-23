@@ -28,5 +28,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency "resque", "~> 1.23.1"
   spec.add_development_dependency "rake"
   spec.add_development_dependency "rspec", "~> 2.13.0"
+  spec.add_development_dependency "rack-test"
   spec.add_development_dependency "sinatra-reloader"
 end
