@@ -17,7 +17,7 @@ module Barmaid
     end
 
     def initialize
-      @config = Barmaid::Configuration.instance.settings
+      @config = Barmaid::Config.config
       super
     end
 
@@ -31,15 +31,15 @@ module Barmaid
 
 
     get '/api/servers' do
-      jsonp @config["servers"].keys
+      jsonp @config[:servers].keys
     end
 
     get '/api/servers/:server_id/targets' do
-      jsonp @config["servers"][params[:server_id]]["targets"].keys
+      jsonp @config[:servers][params[:server_id]][:targets].keys
     end
 
     get '/api/servers/:server_id/targets/:target_id' do
-      jsonp @config["servers"][params[:server_id]]["targets"][params[:target_id]]
+      jsonp @config[:servers][params[:server_id]][:targets][params[:target_id]]
     end
 
     get '/api/servers/:server_id/backups' do

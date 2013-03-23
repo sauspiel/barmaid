@@ -74,25 +74,27 @@ module Barmaid
 
         raise "params does not contain a :target definition" if params[:target].nil?
 
-        settings = Configuration.instance.settings["servers"]
-        raise "Could not find a configuration for server #{params[:server]}" if settings[params[:server]].nil?
+        config = Barmaid::Config.config[:servers]
+        raise "No :servers configuration found! Please check your barmaid configuration!" if config.nil?
 
-        raise "No targets defined for server #{params[:servers]}" if settings[params[:server]]["targets"].nil?
+        raise "Could not find a configuration for server #{params[:server]}" if config[params[:server].to_sym].nil?
 
-        target = settings[params[:server]]["targets"][params[:target]]
+        raise "No targets defined for server #{params[:servers]}" if config[params[:server].to_sym][:targets].nil?
+
+        target = config[params[:server].to_sym][:targets][params[:target].to_sym]
         raise "Could not find a target configuration for server #{params[:server]} and target #{params[:target]}" if target.nil?
 
-        path = target["path"]
+        path = target[:path]
         raise "No path configured for target #{params[:target]}" if path.nil?
 
         job = nil
         log = Logger.log('RecoverJob')
         new_recover_opts = Hash.new
         new_recover_opts.merge!(params[:recover_opts]) if !params[:recover_opts].nil?
-        new_recover_opts[:remote_ssh_cmd] = target["remote_ssh_cmd"] if target["remote_ssh_cmd"]
-        if target["recover_job_name"]
-          log.info("Trying to instantiate #{target["recover_job_name"]}")
-          job = Object.const_get(target["recover_job_name"]).new(backup, path, new_recover_opts)
+        new_recover_opts[:remote_ssh_cmd] = target[:remote_ssh_cmd] if target[:remote_ssh_cmd]
+        if target[:recover_job_name]
+          log.info("Trying to instantiate #{target[:recover_job_name]}")
+          job = Object.const_get(target[:recover_job_name]).new(backup, path, new_recover_opts)
         else
           log.info("No recover_job_name defined, instantiating default RecoverJob")
           job = RecoverJob.new(backup, path, new_recover_opts)

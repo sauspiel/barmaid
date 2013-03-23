@@ -111,73 +111,72 @@ describe RecoverJob do
   describe ".create_job_by_configuration" do
 
     it 'should create a RecoverJob' do
-      config = { "servers" => 
+      config = { :servers => 
         {
-          "test1" => {
-            "targets" => {
-              "127.0.0.1" => {
-                "path" => "/var/test",
-                "remote_ssh_cmd" => "ssh postgres@127.0.0.1"
+          :test1 => {
+            :targets => {
+              :ssh_localhost => {
+                :path => "/var/test",
+                :remote_ssh_cmd => "ssh postgres@127.0.0.1"
               }
             }
           }
         }
       }
-
-      Barmaid::Configuration.any_instance.stub(:settings).and_return(config)
-      job = RecoverJob.create_job_by_configuration({:server => "test1", :target => "127.0.0.1"}, nil)
+      Barmaid::Config.config = config
+      job = RecoverJob.create_job_by_configuration({:server => "test1", :target => "ssh_localhost"}, nil)
       expect(job).to be_an_instance_of RecoverJob
       expect(job.recover_opts[:remote_ssh_cmd]).to eq('ssh postgres@127.0.0.1')
       expect(job.path).to eq("/var/test")
     end
 
     it 'should create a RecoverJob#2' do
-      config = { "servers" => 
+      config = { :servers => 
         {
-          "test1" => {
-            "targets" => {
-              "127.0.0.1" => {
-                "path" => "/var/test",
-                "remote_ssh_cmd" => "ssh postgres@127.0.0.1"
+          :test1 => {
+            :targets => {
+              :ssh_localhost => {
+                :path => "/var/test",
+                :remote_ssh_cmd => "ssh postgres@127.0.0.1"
               }
             }
           }
         }
       }
-      Barmaid::Configuration.any_instance.stub(:settings).and_return(config)
       params = {:server => "test1",
-        :target => "127.0.0.1",
+        :target => "ssh_localhost",
         :recover_opts => { :remote_ssh_cmd => "ssh postgres@123.0.0.2",
           :target_time => "123"
         }
       }
+      Barmaid::Config.config = config
       job = RecoverJob.create_job_by_configuration(params,nil)
       expect(job.recover_opts[:remote_ssh_cmd]).to eq('ssh postgres@127.0.0.1')
       expect(job.recover_opts[:target_time]).to eq('123')
     end
 
     it 'should create a TestRecoverJob' do
-      config = { "servers" => 
+      config = { :servers => 
         {
-          "test1" => {
-            "targets" => {
-              "127.0.0.1" => {
-                "path" => "/var/test",
-                "recover_job_name" => "TestRecoverJob"
+          :test1 => {
+            :targets => {
+              :ssh_localhost => {
+                :path => "/var/test",
+                :recover_job_name => "TestRecoverJob"
               }
             }
           }
         }
       }
+      Barmaid::Config.config = config
       Object.const_set("TestRecoverJob", Class.new(RecoverJob))
-      Barmaid::Configuration.any_instance.stub(:settings).and_return(config)
-      job = RecoverJob.create_job_by_configuration({:server => "test1", :target => "127.0.0.1"},nil)
+      job = RecoverJob.create_job_by_configuration({:server => "test1", :target => "ssh_localhost"},nil)
       expect(job).to be_an_instance_of TestRecoverJob
     end
 
 
     it 'should raise an exception if no server is configured' do
-      Barmaid::Configuration.any_instance.stub(:settings).and_return({})
+      Barmaid::Config.config = {}
       expect{RecoverJob.create_job_by_configuration({:server => "test1"},nil)}.to raise_error
     end
   end

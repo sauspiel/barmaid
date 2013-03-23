@@ -2,7 +2,7 @@ require "rbarman"
 require "resque"
 require "resque-loner"
 require "barmaid/version"
-require "barmaid/configuration"
+require "barmaid/barmaid_config"
 require "barmaid/logger"
 require "barmaid/jobs/recover_job"
 
