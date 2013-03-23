@@ -8,8 +8,6 @@ module Barmaid
   class BarmaidApp < Sinatra::Base
     helpers Sinatra::Jsonp
 
-    #enable :json_pretty
-
     configure :development do
       register Sinatra::Reloader
     end

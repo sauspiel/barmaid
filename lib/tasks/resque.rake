@@ -1,6 +1,10 @@
 require 'barmaid'
+require 'yaml'
 require 'resque/tasks'
+require File.dirname(__FILE__) + '/../../config/initializers/resque.rb'
 
-task "resque:setup" do
-  ENV['QUEUE'] = 'recover_job_queue'
+namespace :resque do
+  task :setup do
+    ENV['QUEUE'] = 'recover_job_queue'
+  end
 end
