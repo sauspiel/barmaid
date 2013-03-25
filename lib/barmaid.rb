@@ -1,5 +1,6 @@
 require "rbarman"
 require "resque"
+require "resque/plugins/status"
 require "barmaid/version"
 require "barmaid/barmaid_config"
 require "barmaid/logger"

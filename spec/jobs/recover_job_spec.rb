@@ -4,7 +4,8 @@ include Barmaid::Job
 
 describe RecoverJob do
   before :each do
-    @job = RecoverJob.new(nil, '')
+    uuid = SecureRandom.hex.to_s
+    @job = RecoverJob.new(uuid, {})
     Barmaid::Logger.log('RecoverJob').outputters = nil
   end
 
@@ -16,23 +17,27 @@ describe RecoverJob do
     it 'should assign parameters to attributes' do
       backup = RBarman::Backup.new
       backup.server = '123'
-      @job = RecoverJob.new(backup, '/home', { :test => 123 })
+      @job = RecoverJob.new(nil)
+      @job.backup = backup
+      @job.path = '/home'
+      @job.recover_opts = { :test => 123}
       expect(@job.backup.server).to eq('123')
       expect(@job.path).to eq('/home')
       expect(@job.recover_opts[:test]).to eq(123)
     end
   end
 
-  describe "perform!" do
+  describe "execute" do
     it 'should call before_recover, recover and after_recover' do
       @job.backup = RBarman::Backup.new
       @job.should_receive(:before_recover)
+      @job.should_receive(:recover)
       @job.should_receive(:after_recover)
-      @job.perform!
+      @job.execute
     end
   end
 
-  describe "recover" do
+  describe "execute" do
     it 'should call recover on Backup' do
       backup = RBarman::Backup.new
       @job.backup = backup
@@ -40,7 +45,7 @@ describe RecoverJob do
       @job.path = '/home'
       RBarman::Backup.any_instance.should_receive(:recover).once.with(
         @job.path, @job.recover_opts)
-      @job.perform!
+      @job.execute
     end
   end
 
@@ -123,11 +128,14 @@ describe RecoverJob do
           }
         }
       }
+      uuid = SecureRandom.hex.to_s
       Barmaid::Config.config = config
-      job = RecoverJob.create_job_by_configuration({:server => "test1", :target => "ssh_localhost"}, nil)
+      RecoverJob.any_instance.should_receive(:assign_backup).with("test1", "20130325T060315")
+      job = RecoverJob.create_job_by_configuration(uuid,{:server => "test1", :target => "ssh_localhost", :backup_id => "20130325T060315"})
       expect(job).to be_an_instance_of RecoverJob
       expect(job.recover_opts[:remote_ssh_cmd]).to eq('ssh postgres@127.0.0.1')
       expect(job.path).to eq("/var/test")
+      expect(job.uuid).to eq(uuid)
     end
 
     it 'should create a RecoverJob#2' do
@@ -145,12 +153,15 @@ describe RecoverJob do
       }
       params = {:server => "test1",
         :target => "ssh_localhost",
+        :backup_id => "20130325T060315",
         :recover_opts => { :remote_ssh_cmd => "ssh postgres@123.0.0.2",
           :target_time => "123"
         }
       }
+      uuid = SecureRandom.hex.to_s
       Barmaid::Config.config = config
-      job = RecoverJob.create_job_by_configuration(params,nil)
+      RecoverJob.any_instance.should_receive(:assign_backup).with("test1", "20130325T060315")
+      job = RecoverJob.create_job_by_configuration(uuid,params)
       expect(job.recover_opts[:remote_ssh_cmd]).to eq('ssh postgres@127.0.0.1')
       expect(job.recover_opts[:target_time]).to eq('123')
     end
@@ -168,9 +179,11 @@ describe RecoverJob do
           }
         }
       }
+      uuid = SecureRandom.hex.to_s
       Barmaid::Config.config = config
+      RecoverJob.any_instance.should_receive(:assign_backup).with("test1", "20130325T060315")
       Object.const_set("TestRecoverJob", Class.new(RecoverJob))
-      job = RecoverJob.create_job_by_configuration({:server => "test1", :target => "ssh_localhost"},nil)
+      job = RecoverJob.create_job_by_configuration(uuid,{:server => "test1", :target => "ssh_localhost", :backup_id => "20130325T060315"})
       expect(job).to be_an_instance_of TestRecoverJob
     end
 

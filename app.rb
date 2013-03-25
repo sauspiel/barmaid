@@ -76,9 +76,8 @@ module Barmaid
     post '/api/recover_jobs' do
       halt(400) if params.empty?
       data = JSON.parse(request.body.read.to_s, :symbolize_names => true)
-      opts = {:by_configuration => true}
-      opts.merge!(data)
-      jsonp Resque.enqueue(Barmaid::Job::RecoverJob, opts)
+      job_id = Barmaid::Job::RecoverJob.create(data)
+      jsonp({:job_id => job_id})
     end
   end
 end
