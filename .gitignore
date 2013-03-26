@@ -18,3 +18,4 @@ tmp
 tags
 vendor
 config/*.yml
+bin
