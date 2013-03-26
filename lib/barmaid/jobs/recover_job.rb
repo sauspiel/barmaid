@@ -24,6 +24,7 @@ module Barmaid
       # @param [Hash] options options
       def initialize(uuid = nil, options = {})
         @recover_opts = options[:recover_opts] || {}
+        @log = RecoverJob.logger
         super(uuid, options)
       end
       
@@ -93,11 +94,14 @@ module Barmaid
       # convenient method to call {#before_recover}, {#recover} and {#after_recover}, in that order
       def execute
         log = RecoverJob.logger
-        log.info("Recovering backup #{@backup.id} for #{@backup.server} (uuid #{@uuid})")
+        options = @recover_opts.to_json
+        log.info("Recovering backup #{@backup.id} for #{@backup.server} (options: #{options}) (uuid #{@uuid})")
         before_recover
         recover
         after_recover
         log.info("Recover of backup #{@backup.id} for #{@backup.server} (uuid #{@uuid}) finished")
+
+        completed("Backup successfully recovered")
       end
 
       # assings a {RBarman::Backup} to {#backup}
@@ -128,15 +132,11 @@ module Barmaid
 
       # starts the recover process
       def recover
-        if !options[:report_progress]
-          @backup.recover(@path, @recover_opts || {})
-        else
-          t = Thread.new { @backup.recover(@path, @recover_opts || {}) }
-          t.abort_on_exception = true
-          while t.alive?
-            report_progress
-            sleep options[:report_interval] || 1
-          end
+        t = Thread.new { @backup.recover(@path, @recover_opts || {}) }
+        t.abort_on_exception = true
+        while t.alive?
+          report_progress
+          sleep options[:report_interval] || 5
         end
       end
 
@@ -150,14 +150,16 @@ module Barmaid
       def after_recover
       end
 
-      # reports the recover progress by logging a message with how many MB of the backup are copied at that time
+      # reports the recover progress by setting status for resque-status and logging a message to stdout
       # @return [void]
       def report_progress
         backup_size = (@backup.size + @backup.wal_file_size) / 1024 ** 2
-        if target_path_exists?
-          du = target_path_disk_usage / 1024 ** 2
-          @log.info("#{du} MB of #{backup_size} MB copied...")
-        end
+        du = target_path_exists? ? target_path_disk_usage / 1024 ** 2 : 0
+        percent = du.to_f / backup_size.to_f * 100
+        percent = 100.0 if percent >= 100.0
+        message = "#{percent.to_i}% of Backup #{@backup.id} (#{@backup.server}) recovered" 
+        at(percent.to_i, 100, message)
+        @log.info(message)
       end
 
       # if backup should be recovered to a remote host
