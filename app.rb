@@ -65,12 +65,8 @@ module Barmaid
       jsonp h
     end
 
-    get '/api/recover_jobs/queued' do
-      jsonp Resque.peek('recover_job_queue', 0, 100)
-    end
-
-    get '/api/recover_jobs/working' do
-      jsonp Resque::Worker.working.map(&:job)
+    get '/api/recover_jobs' do
+      jsonp Resque::Plugins::Status::Hash.statuses
     end
 
     post '/api/recover_jobs' do
