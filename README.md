@@ -12,18 +12,17 @@ Provides a restful HTTP api for PostgreSQL backup tool [barman](http://pgbarman.
 barmaid has to be installed and run as the same user as barman (default 'barman'), otherwise it won't have access to your backups. So consider to do all steps as 'barman' user.
 
     cd $HOME
-    mkdir barmaid
 
 ### From Source
 
     $ git clone https://github.com/sauspiel/barmaid.git
-    $ bundle install --path vendor/bundle --binstubs
+    $ cd barmaid && bundle install --path vendor/bundle --binstubs
 
 ### Gem
 
 Note: barmaid isn't released as gem yet, so please install from source!
 
-    $ cd barmaid
+    $ mkdir barmaid && cd barmaid
     
 Create a 'Gemfile' with the following content
 
