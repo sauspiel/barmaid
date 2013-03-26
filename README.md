@@ -1,14 +1,31 @@
-# Barmaid
+# barmaid
 
 Provides a restful HTTP api for PostgreSQL backup tool [barman](http://pgbarman.org) to recover backups to several targets (paths or hosts).
 
 ## Requirements
 
-It uses [redis](http://redis.io) for its job queues, so you need a minimal redis server somewhere before you start.
+[Ruby](http://www.ruby-lang.org/en/downloads), a working [barman](http://pgbarman.org) installation and [redis](http://redis.io) for its job queues, so you need a minimal redis server somewhere before you start. If you don't have one, executing [these](http://redis.io/download) steps should be sufficent.
+
 
 ## Installation
 
-Add this line to your application's Gemfile:
+barmaid has to be installed and run as the same user as barman (default 'barman'), otherwise it won't have access to your backups. So consider to do all steps as 'barman' user.
+
+    cd $HOME
+    mkdir barmaid
+
+### From Source
+
+    $ git clone https://github.com/sauspiel/barmaid.git
+    $ bundle install --path vendor/bundle --binstubs
+
+### Gem
+
+Note: barmaid isn't released as gem yet, so please install from source!
+
+    $ cd barmaid
+    
+Create a 'Gemfile' with the following content
 
     gem 'barmaid'
 
@@ -22,123 +39,58 @@ Or install it yourself as:
 
 ## Config
 
-Copy config/barmaid.yml.sample to config/barmaid.yml and change it to your needs.
+### resque/redis
+
+    $ cp config/resque.yml.sample config/resque.yml
+ 
+ It should work out of the box if your redis server is running on the same host, otherwise adapt the connection settings.
+
+### barmaid
+
+    $ cp config/barmaid.yml.sample config/barmaid.yml
+
+Adapt barmaid.yml to your needs:
 
 <pre>
-"jobs": '/var/lib/barman/barmaid/jobs'              
-"servers":                             
-  "testdb1":                                        
-    "targets":
-      "localhost":                                    
-        "path": '/var/lib/barman/recover/testbd1'    
-      "staging":
-        "path": '/var/lib/postgresql/9.2/main'
-        "remote_ssh_cmd": 'ssh postgres@10.20.20.4'   
-  "testdb2":                                        
-    "targets": 
-      "localhost":
-        "path": '/var/lib/barman/recover/backup2'
-      "host3":
-        "path": '/var/lib/postgresql/9.1/main'
-        "remote_ssh_cmd": 'ssh postgres@10.20.20.10'
-        "recover_job": 'RecoverJobHost3'
+:jobs: '/var/lib/barman/barmaid/jobs'
+:servers:
+  :backup1:
+    :targets:
+      :localhost:
+        :path: '/var/lib/barman/recover/backup1'
+      :host2:
+        :path: '/var/lib/postgresql/9.2/main'
+        :remote_ssh_cmd: 'ssh postgres@host2.sample.com'
+        :recover_job_name: 'RecoverJobHost2'
+  :backup2:
+    :targets:
+      :localhost:
+        :path: '/var/lib/barman/recover/backup2'
+      :host3:
+        :path: '/var/lib/postgresql/9.2/main'
+        :remote_ssh_cmd: 'ssh postgres@host3.sample.com'
+        :recover_job_name: 'RecoverJobHost3'
 </pre>
 
-* "jobs": (optional) the path to your custom recover jobs. all *.rb files in this path will be loaded on startup
-* "servers": (required) a list of servers in barman terms (should be equivalent to `barman list-server`)
-* "target": (required) a descriptive name for a target (or destination), has to be unique to a server (e.g. 'localhost')
-* "path": (required) filesystem path where the recover backup should be placed. when 'remote_ssh_cmd' is given, path is meant to be on the remote host, otherwise local</br>
-* "remote_ssh_cmd": (optional) the recover will be done over ssh (same as 'barman recover --remote-ssh-command')
-* "recover_job_name": (optinal) a custom recover job script can be used for a target, for example to prepare several things before or after the recover. when not set, the default recover job will be triggered, which does just a 'barman recover'
+* :jobs: (optional) the path to your custom recover jobs. all *.rb files in this path will be loaded on startup
+* :servers: (required) a list of servers in barman terms (should be equivalent to `barman list-server`)
+* :targets: (required) a list of targets (think of destinations), each one with a descriptive name (without dots) and unique in context of a server
+* :path: (required) filesystem path where the recover backup should be placed. when 'remote_ssh_cmd' is given, path is meant to be on the remote host, otherwise local
+* :remote_ssh_cmd: (optional) the recover will be done over ssh (same as 'barman recover --remote-ssh-command')
+* :recover_job_name: (optinal) a custom recover job script can be used for a target, for example to prepare several things before or after the recover. when not set, the default recover job will be triggered, which does just a 'barman recover'
 
-## API
 
-### GET /api/servers
+## Starting barmaid
 
-Retrieve a list of all servers
+If everything is in place, start barmaid with default 0.0.0.0:9292
 
-Example:
+    $ ./bin/rackup
 
-    curl http://localhost:9292/api/servers
+or to listen on 127.0.0.1:8080
 
-```json
-[
-  "testdb1",
-  "testdb2"
-]
-```
-
-### GET /api/servers/id/targets
-
-Retrieve all targets for a specific server
-
-Example:
-
-    curl -H http://localhost:9292/api/servers/testdb1/targets
-
-```json
-[
-  "localhost",
-  "127.0.0.1"
-]
-```
-
-### GET /api/servers/id/targets/id
-
-Retrieve details for a specific target
-
-Example:
-
-    curl http://localhost:9292/api/servers/testdb1/targets/127.0.0.1
-
-```json
-{
-  "path": "/var/lib/barman/recover/127.0.0.1",
-  "remote_ssh_cmd": "ssh barman@127.0.0.1",
-}
-```
-
-### GET /api/servers/id/backups
-
-Retrieve a list of backups for a server
-
-Example
-  
-    curl http://localhost:9292/api/servers/testdb1/backups
-
-```json
-[
-  "20130318T080002",
-  "20130225T192654"
-]
-```
-
-### GET /api/servers/id/backups/id
-
-Retrieve details about a backup
-
-Example
-
-    curl http://localhost:9292/api/servers/testdb1/backups/20130322T072507
-
-```json
-{
-  "size": 19355207,
-  "status": "done",
-  "backup_start": "2013-03-22 07:25:07 +0100",
-  "backup_end": "2013-03-22 07:25:14 +0100",
-  "timeline": 1,
-  "wal_file_size": 973078528
-}%
-```
-
-### POST /api/recover_jobs
-
-Creates a new recover job and recovers the backup to a target
-
-Example
-
-    curl -v -X POST -d '{"server":"testdb1", "target":"127.0.0.1", "backup_id": "20130322T072507"}' http://localhost:9292/api/recover_jobs
+    $ ./bin/rackup -o 127.0.0.1 -p 8080
+    
+## [HTTP API](API.md)
 
 
 ## Contributing
