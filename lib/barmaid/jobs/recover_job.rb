@@ -94,14 +94,14 @@ module Barmaid
       # convenient method to call {#before_recover}, {#recover} and {#after_recover}, in that order
       def execute
         log = RecoverJob.logger
-        options = @recover_opts.to_json
-        log.info("Recovering backup #{@backup.id} for #{@backup.server} (options: #{options}) (uuid #{@uuid})")
+        log.info("Recovering backup #{@backup.id} for #{@backup.server} (options: #{@options.to_json}) (uuid #{@uuid})")
         before_recover
         recover
         after_recover
-        log.info("Recover of backup #{@backup.id} for #{@backup.server} (uuid #{@uuid}) finished")
+        msg = "Recover of backup #{@backup.id} for #{@backup.server} (uuid #{@uuid}) finished"
+        log.info(msg)
 
-        completed("Backup successfully recovered")
+        completed({:message => msg, :completed_at => Time.now})
       end
 
       # assings a {RBarman::Backup} to {#backup}

@@ -70,14 +70,22 @@ module Barmaid
     end
 
     get '/api/recover_jobs/:job_id' do
-      jsonp Resque::Plugins::Status::Hash.statuses.select { |s| s.uuid == params[:job_id] }.first
+      status = Resque::Plugins::Status::Hash.get(params[:job_id])
+      h = Hash.new
+      h[:status] = status.status
+      h[:time] = status.time
+      h[:message] = status.message || ""
+      h[:pct_complete] = status.pct_complete
+      h[:options] = status["options"]
+      h[:completed_at] = status["completed_at"] || ""
+      jsonp h
     end
 
     delete '/api/recover_jobs/:job_id' do
-      job = Resque::Plugins::Status::Hash.statuses.select { |s| s.uuid == params[:job_id] }.first
-      if job["status"] == "queued"
+      status = Resque::Plugins::Status::Hash.get(params[:job_id])
+      if status.queued?
         jsonp Resque::Plugins::Status::Hash.remove(params[:job_id])
-      elsif job["status"] == "running"
+      elsif status.working?
         jsonp Resque::Plugins::Status::Hash.kill(params[:job_id])
       end
     end

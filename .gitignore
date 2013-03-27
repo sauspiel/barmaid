@@ -19,3 +19,5 @@ tags
 vendor
 config/*.yml
 bin
+
+/jobs/
