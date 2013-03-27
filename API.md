@@ -95,3 +95,47 @@ Example
   "job_id": "032d06777b177ffd333631b2ce2c2c8e"
 }
 ```
+
+### GET /api/recover_jobs
+
+Lists all current recover jobs
+
+Example
+
+  curl http://localhost:9292/api/recover_jobs
+
+```json
+["032d06777b177ffd333631b2ce2c2c8e"]
+```
+
+### GET /api/recover_jobs/id
+
+Retrieve details about a recover job
+
+Example
+
+  curl http://localhost:9292/api/recover_jobs/032d06777b177ffd333631b2ce2c2c8e
+
+```json
+{
+  "time": 1364395857,
+  "status": "queued",
+  "uuid": "032d06777b177ffd333631b2ce2c2c8e",
+  "options": {
+    "server": "testdb1",
+    "target": "localhost",
+    "backup_id": "20130322T072507"
+}
+```
+
+### DELETE /api/recover_jobs/id
+
+Deletes a recover job from the queue or kills it 
+
+Example
+
+  curl -X DELETE http://localhost:9292/api/recover_jobs/032d06777b177ffd333631b2ce2c2c8e
+
+```json
+true
+```
