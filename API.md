@@ -119,12 +119,15 @@ Example
 ```json
 {
   "time": 1364395857,
-  "status": "queued",
-  "uuid": "032d06777b177ffd333631b2ce2c2c8e",
+  "status": "working",
+  "message": "",
+  "pct_complete": 48,
   "options": {
     "server": "testdb1",
     "target": "localhost",
     "backup_id": "20130322T072507"
+  },
+  "completed_at": ""
 }
 ```
 
