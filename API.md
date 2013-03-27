@@ -43,7 +43,7 @@ Example:
 ```json
 {
   "path": "/var/lib/barman/recover/127.0.0.1",
-  "remote_ssh_cmd": "ssh barman@127.0.0.1",
+  "remote_ssh_cmd": "ssh barman@127.0.0.1"
 }
 ```
 
@@ -78,7 +78,7 @@ Example
   "backup_end": "2013-03-22 07:25:14 +0100",
   "timeline": 1,
   "wal_file_size": 973078528
-}%
+}
 ```
 
 ### POST /api/recover_jobs
@@ -87,4 +87,11 @@ Creates a new recover job and recovers the backup to a target
 
 Example
 
-    curl -v -X POST -d '{"server":"testdb1", "target":"127.0.0.1", "backup_id": "20130322T072507"}' http://localhost:9292/api/recover_jobs
+    curl -v -X POST -d '{"server":"testdb1", "target":"localhost", "backup_id": "20130322T072507"}' \
+    http://localhost:9292/api/recover_jobs
+    
+```json
+{
+  "job_id": "032d06777b177ffd333631b2ce2c2c8e"
+}
+```
