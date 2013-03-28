@@ -50,7 +50,7 @@ Start a worker!
 
 Create a new recover job by the api!
 
-  barman@localhost $ curl -v -X POST -d '{"server":"backup1","target":"localhost","backup_id":"20130327T154109"}' http://localhost:9292/api/recover_jobs
+    barman@localhost $ curl -v -X POST -d '{"server":"backup1","target":"localhost","backup_id":"20130327T154109"}' http://localhost:9292/api/recover_jobs
 
 ```json
 {"job_id":"3575aa60ddd35cc1dffcd6454aa20657"}
