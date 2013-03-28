@@ -88,8 +88,18 @@ If everything is in place, start barmaid with default 0.0.0.0:9292
 or to listen on 127.0.0.1:8080
 
     $ ./bin/rackup -o 127.0.0.1 -p 8080
+
+check if it's working
+
+    $ curl http://localhost:9292/api/servers
+
+and start your job worker
+
+    $ VVERBOSE=1 ./bin/rake resque:work
     
 ## [HTTP API](API.md)
+
+## [JOBS](JOBS.md)
 
 
 ## Contributing

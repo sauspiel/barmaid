@@ -87,7 +87,7 @@ Several attributes are accessable in the scripts like
 Please look at the documentation of 'RecoverJob' if you want to get more details!
 
 
-A possible use case would be to recover a backup to a staging database server:
+A possible use case could be to recover a backup to a staging database server:
 
 * stop postgresql
 * delete old database
