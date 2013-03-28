@@ -121,7 +121,7 @@ class RecoverJobXYZStaging < Barmaid::Job::RecoverJob
 
   def after_recover
     @log.info("Modifying #{@options[:target]}'s archive_command")
-    cmd = "\"echo -e \"#\!/bin/sh\\n/bin/true\" > #{@path}/archive_command.sh\""
+    cmd = "\'echo -e \"#\!/bin/sh\\n/bin/true\" > #{@path}/archive_command.sh\'"
     sh(create_cmd(cmd), {:abort_on_error => true})
 
     # deleting unused files, debian reads them from /etc/postgresql/*
@@ -129,6 +129,9 @@ class RecoverJobXYZStaging < Barmaid::Job::RecoverJob
 
     @log.info("Starting PostgreSQL on #{@options[:target]}")
     sh(create_cmd("/etc/init.d/postgresql start"), {:abort_on_error => true})
+
+    @log.info("Waiting 20 minutes for database start up")
+    sleep(20 * 60)
 
     @log.info("Renaming database on #{@options[:target]}")
     sh(create_cmd("\"echo \'alter database beer_production rename to beer_staging\' | psql\""), {:abort_on_error => true})
