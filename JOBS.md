@@ -87,9 +87,54 @@ Several attributes are accessable in the scripts like
 Please look at the documentation of 'RecoverJob' if you want to get more details!
 
 
-A real example:
+A possible use case would be to recover a backup to a staging database server:
+
+* stop postgresql
+* delete old database
+* start recovery
+* modify the archive command
+* start postgresql
+* rename the database
 
 ```ruby
+class RecoverJobXYZStaging < Barmaid::Job::RecoverJob
+
+  def initialize(uuid = nil, options = {})
+    super(uuid, options)
+  end
+
+  def before_recover
+    @log.info("Stopping PostgreSQL on #{@options[:target]}")
+    sh(create_cmd("/etc/init.d/postgresql stop"), {:abort_on_error => true})
+
+    if target_path_exists?
+      @log.info("deleting #{@path} on #{@options[:target]}")
+      delete_target_path 
+    end
+
+    create_target_path
+  end
+
+  def recover
+    super
+  end
+
+  def after_recover
+    @log.info("Modifying #{@options[:target]}'s archive_command")
+    cmd = "\"echo -e \"#\!/bin/sh\\n/bin/true\" > #{@path}/archive_command.sh\""
+    sh(create_cmd(cmd), {:abort_on_error => true})
+
+    # deleting unused files, debian reads them from /etc/postgresql/*
+    sh(create_cmd("\"cd #{@path} && rm postgresql.conf\* pg_hba.conf pg_ident.conf\""), {:abort_on_error => true})
+
+    @log.info("Starting PostgreSQL on #{@options[:target]}")
+    sh(create_cmd("/etc/init.d/postgresql start"), {:abort_on_error => true})
+
+    @log.info("Renaming database on #{@options[:target]}")
+    sh(create_cmd("\"echo \'alter database beer_production rename to beer_staging\' | psql\""), {:abort_on_error => true})
+  end
+
+end
 ```
 
 

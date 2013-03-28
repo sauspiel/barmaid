@@ -229,11 +229,15 @@ module Barmaid
         return remote_recover? ? @recover_opts[:remote_ssh_cmd] : ''
       end
 
-      private
-
+      # executes a shell command
+      # @param [String] string the command which should be executed
+      # @param [Hash] opts options
+      # @option opts [Boolean] :abort_on_error if set to true it will raise an exception when an error occurs
+      # @option opts [Integer] :timeout sets the timeout (in secs) for the command. if command takes longer than timeout, it'l raise an exception. Default is 600 secs
+      # @return [Mixlib::ShellOut] @see http://rubydoc.info/gems/mixlib-shellout/1.1.0/Mixlib/ShellOut
       def sh(cmd, opts = {})
         sh = Mixlib::ShellOut.new("#{cmd}")
-        sh.timeout = 600 # 600 secs
+        sh.timeout = opts[:timeout] || 600 # 600 secs
         sh.run_command
         sh.error! if opts[:abort_on_error]
         return sh

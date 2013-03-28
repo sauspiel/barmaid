@@ -44,11 +44,11 @@ module Barmaid
     end
 
     get '/api/servers/:server_id/targets' do
-      jsonp @config[:servers][params[:server_id]][:targets].keys
+      jsonp @config[:servers][params[:server_id].to_sym][:targets].keys
     end
 
     get '/api/servers/:server_id/targets/:target_id' do
-      jsonp @config[:servers][params[:server_id]][:targets][params[:target_id]]
+      jsonp @config[:servers][params[:server_id].to_sym][:targets][params[:target_id].to_sym]
     end
 
     get '/api/servers/:server_id/backups' do
