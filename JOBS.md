@@ -42,11 +42,11 @@ Note: :recover_job_name: has to be the name of the class.
 
 Start barmaid!
 
-  barman@localhost $ ./bin/rackup
+    barman@localhost $ ./bin/rackup
 
 Start a worker!
 
-  barman@localhost $ ./bin/rake resque:work
+    barman@localhost $ ./bin/rake resque:work
 
 Create a new recover job by the api!
 
