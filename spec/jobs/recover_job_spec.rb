@@ -30,21 +30,11 @@ describe RecoverJob do
   describe "execute" do
     it 'should call before_recover, recover and after_recover' do
       @job.backup = RBarman::Backup.new
+      @job.stub!(:recover)
+      @job.stub!(:completed)
       @job.should_receive(:before_recover)
       @job.should_receive(:recover)
       @job.should_receive(:after_recover)
-      @job.execute
-    end
-  end
-
-  describe "execute" do
-    it 'should call recover on Backup' do
-      backup = RBarman::Backup.new
-      @job.backup = backup
-      @job.recover_opts = { :test => 123 }
-      @job.path = '/home'
-      RBarman::Backup.any_instance.should_receive(:recover).once.with(
-        @job.path, @job.recover_opts)
       @job.execute
     end
   end
