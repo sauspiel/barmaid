@@ -26,6 +26,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "resque-status"
   spec.add_dependency "log4r"
   spec.add_dependency "mixlib-shellout", "~> 1.1.0"
+  spec.add_dependency "net-ssh"
   spec.add_development_dependency "rake"
   spec.add_development_dependency "rspec", "~> 2.13.0"
   spec.add_development_dependency "rack-test"
