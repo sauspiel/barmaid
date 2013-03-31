@@ -27,7 +27,7 @@ describe RecoverJob do
     end
   end
 
-  describe "execute" do
+  describe "#execute" do
     it 'should call before_recover, recover and after_recover' do
       @job.backup = RBarman::Backup.new
       @job.stub!(:recover)
@@ -39,7 +39,7 @@ describe RecoverJob do
     end
   end
 
-  describe "remote_recover?" do
+  describe "#remote_recover?" do
     it 'should return true when recover_opts[:remote_ssh_cmd] is set, otherwise false' do
       @job.recover_opts[:remote_ssh_cmd] = 'ssh postgres@localhost'
       expect(@job.remote_recover?).to eq(true)
@@ -48,58 +48,24 @@ describe RecoverJob do
     end
   end
 
-  describe "target_path_disk_usage" do
+  describe "#target_path_disk_usage" do
     it 'should return target path disk usage in bytes' do
-      Mixlib::ShellOut.any_instance.stub(:run_command)
-      Mixlib::ShellOut.any_instance.stub(:error!)
-      Mixlib::ShellOut.any_instance.stub(:stdout).and_return("22756856\t/usr/local\n")
+      res = ShellCommand::ShellCommandResult.new("a", "22756856\t/usr/local\n", "", 0)
+      @job.stub!(:exec_command).and_return(res)
       expect(@job.target_path_disk_usage).to eq(22756856)
     end
   end
 
-  describe "ssh_cmd" do
-    it 'should return an ssh command if set by options' do
-      @job.recover_opts = { :remote_ssh_cmd => 'ssh postgres@localhost' }
-      expect(@job.ssh_cmd).to eq('ssh postgres@localhost')
-    end
-    
-    it 'should return an empty string if ssh command is not set' do
-      @job.recover_opts = nil
-      expect(@job.ssh_cmd).to eq('')
-    end
-  end
-
-  describe "target_path_exists?" do
+  describe "#target_path_exists?" do
     it 'should return true if path exists' do
-      Mixlib::ShellOut.any_instance.stub(:run_command)
-      Mixlib::ShellOut.any_instance.stub(:error!)
-      Mixlib::ShellOut.any_instance.stub_chain(:status, :exitstatus).and_return(0)
+      res = ShellCommand::ShellCommandResult.new("a", "","", 0)
+      @job.stub!(:exec_command).and_return(res)
       expect(@job.target_path_exists?).to eq(true)
     end
     it 'should return false if path does not exist' do
-      Mixlib::ShellOut.any_instance.stub(:run_command)
-      Mixlib::ShellOut.any_instance.stub(:error!)
-      Mixlib::ShellOut.any_instance.stub_chain(:status, :exitstatus).and_return(1)
+      res = ShellCommand::ShellCommandResult.new("a", "","", 1)
+      @job.stub!(:exec_command).and_return(res)
       expect(@job.target_path_exists?).to eq(false)
-    end
-  end
-
-  describe "create_target_path" do
-    it 'should raise RuntimeError if target path could not be created' do
-      @job.path = "/home"
-      Mixlib::ShellOut.any_instance.stub(:run_command)
-      Mixlib::ShellOut.any_instance.stub(:error!)
-      Mixlib::ShellOut.any_instance.stub_chain(:status, :exitstatus).and_return(1)
-      Mixlib::ShellOut.any_instance.stub(:stderr).and_return("some failure")
-      expect{@job.create_target_path}.to raise_error(RuntimeError)
-    end
-
-    it 'should not raise RuntimeError if target path could be created' do
-      @job.path = "/home"
-      Mixlib::ShellOut.any_instance.stub(:run_command)
-      Mixlib::ShellOut.any_instance.stub(:error!)
-      Mixlib::ShellOut.any_instance.stub_chain(:status, :exitstatus).and_return(0)
-      @job.create_target_path
     end
   end
 
@@ -181,6 +147,32 @@ describe RecoverJob do
     it 'should raise an exception if no server is configured' do
       Barmaid::Config.config = {}
       expect{RecoverJob.create_job_by_configuration({:server => "test1"},nil)}.to raise_error
+    end
+  end
+
+  describe "#ssh_session_valid?" do
+    it 'should return false if ssh_session is null' do
+      expect(@job.ssh_session_valid?).to eq(false)
+    end
+
+    it 'should return false if ssh_session is closed' do
+      transport =  Object.new
+      transport.stub!(:socket)
+      transport.stub!(:logger).and_return(RecoverJob.logger)
+      transport.stub!(:closed?).and_return(true)
+      session = Net::SSH::Connection::Session.new(transport)
+      @job.ssh_session = session
+      expect(@job.ssh_session_valid?).to eq(false)
+    end
+
+    it 'should return true if ssh_session is not close' do
+      transport =  Object.new
+      transport.stub!(:socket)
+      transport.stub!(:logger).and_return(RecoverJob.logger)
+      transport.stub!(:closed?).and_return(false)
+      session = Net::SSH::Connection::Session.new(transport)
+      @job.ssh_session = session
+      expect(@job.ssh_session_valid?).to eq(true)
     end
   end
 end
