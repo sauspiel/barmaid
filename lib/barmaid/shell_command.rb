@@ -39,6 +39,10 @@ module Barmaid
         return "Command: \"#{@cmd}\", stdout: \"#{@stdout}\", stderr: \"#{@stderr}\", exit_code: \"#{@exit_code}\""
       end
 
+      def succeeded?
+        return @exit_code.to_i == 0 ? true : false
+      end
+
     end
 
 
