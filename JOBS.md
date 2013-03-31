@@ -105,7 +105,7 @@ class RecoverJobXYZStaging < Barmaid::Job::RecoverJob
 
   def before_recover
     @log.info("Stopping PostgreSQL on #{@options[:target]}")
-    sh(create_cmd("/etc/init.d/postgresql stop"), {:abort_on_error => true})
+    exec_command("/etc/init.d/postgresql stop", {:abort_on_error => true})
 
     if target_path_exists?
       @log.info("deleting #{@path} on #{@options[:target]}")
@@ -121,20 +121,20 @@ class RecoverJobXYZStaging < Barmaid::Job::RecoverJob
 
   def after_recover
     @log.info("Modifying #{@options[:target]}'s archive_command")
-    cmd = "\'echo -e \"#\!/bin/sh\\n/bin/true\" > #{@path}/archive_command.sh\'"
-    sh(create_cmd(cmd), {:abort_on_error => true})
+    cmd = "echo \"#!/bin/sh\n/bin/true\" > #{@path}/archive_command.sh"
+    exec_command(cmd, {:abort_on_error => true})
 
     # deleting unused files, debian reads them from /etc/postgresql/*
-    sh(create_cmd("\"cd #{@path} && rm postgresql.conf\* pg_hba.conf pg_ident.conf\""), {:abort_on_error => true})
+    exec_command("cd #{@path} && rm postgresql.conf\* pg_hba.conf pg_ident.conf", {:abort_on_error => true})
 
     @log.info("Starting PostgreSQL on #{@options[:target]}")
-    sh(create_cmd("/etc/init.d/postgresql start"), {:abort_on_error => true})
+    exec_command("/etc/init.d/postgresql start", {:abort_on_error => true})
 
     @log.info("Waiting 20 minutes for database start up")
     sleep(20 * 60)
 
     @log.info("Renaming database on #{@options[:target]}")
-    sh(create_cmd("\"echo \'alter database beer_production rename to beer_staging\' | psql\""), {:abort_on_error => true})
+    exec_command("echo \'alter database beer_production rename to beer_staging\' | psql"), {:abort_on_error => true})
   end
 
 end
