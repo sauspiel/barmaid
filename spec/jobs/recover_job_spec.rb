@@ -56,6 +56,15 @@ describe RecoverJob do
     end
   end
 
+  describe "#ssh_connection_options" do
+    it 'should return valid ssh connection options' do
+      @job.recover_opts[:remote_ssh_cmd] = "ssh postgres@127.0.0.1"
+      con_opts = @job.ssh_connection_options
+      expect(con_opts[:host]).to eq("127.0.0.1")
+      expect(con_opts[:user]).to eq("postgres")
+    end
+  end
+
   describe "#target_path_exists?" do
     it 'should return true if path exists' do
       res = ShellCommand::ShellCommandResult.new("a", "","", 0)

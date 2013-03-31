@@ -108,20 +108,25 @@ module Barmaid
         completed({:message => msg, :completed_at => Time.now})
       end
 
-      # creates a new ssh session by extracting user and host information from #recover_opts[:remote_ssh_cmd] and assings the created session to #ssh_session
+      # creates a new ssh session and assings the created session to #ssh_session
       # @return [Net::SSH::Connection::Session]
       def init_ssh_session
         @ssh_session.close if !(@ssh_session.nil? or !@ssh_session.closed?)
-
-        match = @recover_opts[:remote_ssh_cmd].match(/(\w+)@(\w+)/)
-        host = match[0]
-        user = match[1]
-        @ssh_session = ::Net::SSH.start(host, user)
+        ssh_opts = ssh_connection_options
+        @log.info("Opening ssh connection to #{ssh_opts[:host]} as user #{ssh_opts[:user]}")
+        @ssh_session = ::Net::SSH.start(ssh_opts[:host], ssh_opts[:user])
         return @ssh_session
       end
 
+      # @return [Boolean] whether the job's #ssh_session is open
       def ssh_session_valid?
         return !(@ssh_session.nil? or @ssh_session.closed?)
+      end
+
+
+      def ssh_connection_options
+        match = @recover_opts[:remote_ssh_cmd].match(/(\w+)@([a-zA-Z|0-9|\.|-|_]*)/)
+        return { :user => match[1], :host => match[2] }
       end
 
       # assings a {RBarman::Backup} to {#backup}
@@ -204,7 +209,7 @@ module Barmaid
 
       # @return [Boolean] whether the target directory exists defined by {#path}
       def target_path_exists?
-        return exec_command("[ -d #{@path} ]").succeeded?
+        return exec_command("test -d #{@path}").succeeded?
       end
 
       # creates the target directory defined by {#path}, recursive
