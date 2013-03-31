@@ -10,7 +10,9 @@ module Barmaid
       log = Log4r::Logger[name]
       if log.nil?
         log = Log4r::Logger.new name
-        log.outputters = Log4r::Outputter.stdout
+        outputter = Log4r::Outputter.stdout
+        outputter.formatter = Log4r::PatternFormatter.new(:pattern => "%d - %m")
+        log.outputters = outputter
       end
       return log
     end
