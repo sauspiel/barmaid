@@ -130,13 +130,23 @@ class RecoverJobXYZStaging < Barmaid::Job::RecoverJob
     @log.info("Starting PostgreSQL on #{@options[:target]}")
     exec_command("/etc/init.d/postgresql start", {:abort_on_error => true})
 
-    @log.info("Waiting 20 minutes for database start up")
-    sleep(20 * 60)
+    @log.info("Waiting max 60 minutes until postgresql is started up")
+    pg_started = false
+    for i in 1..60
+      result = exec_command("echo \"select 1\" | psql")
+      pg_started = result.succeeded?
+      break if pg_started
+      @log.info("PostgreSQL reports \"#{result.stderr}\", waiting..")
+      sleep(60)
+    end
 
-    @log.info("Renaming database on #{@options[:target]}")
-    exec_command("echo \'alter database beer_production rename to beer_staging\' | psql"), {:abort_on_error => true})
+    if !pg_started
+      raise "PostgreSQL did not start up within 60 minutes!"
+    else
+      @log.info("Renaming database on #{@options[:target]}")
+      exec_command("echo \'alter database beer_production rename to beer_staging\' | psql"), {:abort_on_error => true})
+    end
   end
-
 end
 ```
 
