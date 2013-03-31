@@ -19,6 +19,10 @@ module Barmaid
       # @note If {#recover_opts} contains :remote_ssh_cmd, the path is remote, otherwise local
       attr_accessor :path
 
+
+      # @return [Net::SSH::Connection::Session] the ssh session to be used for executing commands via ssh
+      attr_accessor :ssh_session
+
       # initializes a new instance of RecoverJob
       # @param [String] uuid the unique id of the job
       # @param [Hash] options options
@@ -104,6 +108,22 @@ module Barmaid
         completed({:message => msg, :completed_at => Time.now})
       end
 
+      # creates a new ssh session by extracting user and host information from #recover_opts[:remote_ssh_cmd] and assings the created session to #ssh_session
+      # @return [Net::SSH::Connection::Session]
+      def init_ssh_session
+        @ssh_session.close if !(@ssh_session.nil? or !@ssh_session.closed?)
+
+        match = @recover_opts[:remote_ssh_cmd].match(/(\w+)@(\w+)/)
+        host = match[0]
+        user = match[1]
+        @ssh_session = ::Net::SSH.start(host, user)
+        return @ssh_session
+      end
+
+      def ssh_session_valid?
+        return !(@ssh_session.nil? or @ssh_session.closed?)
+      end
+
       # assings a {RBarman::Backup} to {#backup}
       # @param [String] server the server name
       # @param [String] backup_id the id of the backup
@@ -167,82 +187,44 @@ module Barmaid
         return !(@recover_opts.nil? or @recover_opts[:remote_ssh_cmd].nil?)
       end
 
-      # tries to delete the target directory defined by {#path}
+      # deletes the target directory defined by {#path}
       # @raise [RuntimeError] if {#path} is set to nil, "" or "/"
-      # @retun [Boolean] if delete was successful or target directory doesn't exist
       def delete_target_path
-        return true if !target_path_exists?
+        return if !target_path_exists?
         raise RuntimeError, "Deleting path \"#{@path}\" is dangerous!" if @path == "/" || @path.to_s == ""
-        cmd = create_cmd("rm -rf #{@path}")
-        process = sh(cmd, { :abort_on_error => false })
-        suc = exit_status_to_bool(process.status.exitstatus)
-        if !suc
-          raise RuntimeError, "Error while trying to delete path #{@path}: #{process.stderr}"
-        end
-        return suc
+        exec_command("rm -fr #{@path}", {:abort_on_error => true})
       end
 
       # determines the actual disk usage of the target directory defined by {#path}
       # @return [Integer] the disk usage in bytes
       def target_path_disk_usage
-        cmd = create_cmd("du -bs #{@path}")
-        du = sh(cmd).stdout.split("\n")[0].split("\t")[0].to_i
-        return du
+        cmd = "du -bs #{@path}"
+        return exec_command(cmd, {:abort_on_error => true}).stdout.split("\n")[0].split("\t")[0].to_i
       end
 
       # @return [Boolean] whether the target directory exists defined by {#path}
       def target_path_exists?
-        cmd = create_cmd("[ -d #{@path} ]")
-        return exit_status_to_bool(sh(cmd, { :abort_on_error => false }).status.exitstatus)
+        return exec_command("[ -d #{@path} ]").succeeded?
       end
 
       # creates the target directory defined by {#path}, recursive
-      # @return [Boolean] whether create was successful or true if target directory already exists
-      # @raise [RuntimeError] if an error happens
+      # @raise [RuntimeError] if directory couldn't be created
       def create_target_path
-        return true if target_path_exists?
-        cmd = create_cmd("mkdir -p #{@path}")
-        process = sh(cmd, { :abort_on_error => false })
-        suc = exit_status_to_bool(process.status.exitstatus)
-        if !suc
-          raise RuntimeError, "Error while trying to create target path #{@path}: #{process.stderr}"
+        return if target_path_exists?
+        exec_command("mkdir -p #{@path}", { :abort_on_error => true })
+      end
+
+      def exec_command(cmd, opts = {})
+        sh = ShellCommand.new(cmd)
+        result = nil
+        if !remote_recover?
+          result = sh.exec_local(cmd, opts)
+        else
+          init_ssh_session if !ssh_session_valid?
+          result = sh.exec_ssh('','', @ssh_session, opts)
         end
-        return suc
+        return result
       end
-
-      # converts a shell command exit status to bool
-      # @param [String,Integer] exit_status the exit status reported by a shell command
-      # @return [Boolean] the boolean representation of the exit status
-      def exit_status_to_bool(exit_status)
-        return exit_status.to_i == 0 ? true : false
-      end
-
-      # Prepends a ssh command to the cmd parameter if necessary
-      # @return [String] the cmd with or without a prepended ssh command
-      # @param [String] cmd the shell command which should be executed
-      def create_cmd(cmd)
-        return ssh_cmd.empty? ? cmd : "#{ssh_cmd} #{cmd}"
-      end
-
-      # @return [String] returns the remote ssh cmd defined in {#recover_opts} or empty if not set
-      def ssh_cmd
-        return remote_recover? ? @recover_opts[:remote_ssh_cmd] : ''
-      end
-
-      # executes a shell command
-      # @param [String] string the command which should be executed
-      # @param [Hash] opts options
-      # @option opts [Boolean] :abort_on_error if set to true it will raise an exception when an error occurs
-      # @option opts [Integer] :timeout sets the timeout (in secs) for the command. if command takes longer than timeout, it'l raise an exception. Default is 600 secs
-      # @return [Mixlib::ShellOut] @see http://rubydoc.info/gems/mixlib-shellout/1.1.0/Mixlib/ShellOut
-      def sh(cmd, opts = {})
-        sh = Mixlib::ShellOut.new("#{cmd}")
-        sh.timeout = opts[:timeout] || 600 # 600 secs
-        sh.run_command
-        sh.error! if opts[:abort_on_error]
-        return sh
-      end
-
     end
   end
 end
