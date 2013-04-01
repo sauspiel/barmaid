@@ -47,7 +47,7 @@ module Barmaid
 
     get '/api/servers/:server_id/targets' do
       a = Array.new
-      @config[:servers][params[:server_id].to_sym][:targets].keys.each { |k| a << { :id => k } }
+      @config[:servers][params[:server_id].to_sym][:targets].keys.each { |k| a << { :id => k, :server_id => params[:server_id] } }
       jsonp a
     end
 
@@ -55,13 +55,14 @@ module Barmaid
       h = Hash.new
       h.merge!(@config[:servers][params[:server_id].to_sym][:targets][params[:target_id].to_sym])
       h[:id] = params[:target_id]
+      h[:server_id] = params[:server_id]
       jsonp h
     end
 
     get '/api/servers/:server_id/backups' do
       backups = RBarman::Backups.all(params[:server_id])
       a = Array.new
-      backups.each { |b| a << { :id => b.id } }
+      backups.each { |b| a << { :id => b.id, :server_id => params[:server_id] } }
       jsonp a
     end
 
@@ -72,6 +73,7 @@ module Barmaid
         h[attr] = b.send(attr.to_sym)
       end
       h[:id] = b.id
+      h[:server_id] = params[:server_id]
       jsonp h
     end
 

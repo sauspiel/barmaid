@@ -27,8 +27,8 @@ Example:
 
 ```json
 [
-  {"id":"localhost"},
-  {"id":"host2"}
+  {"id":"localhost", "server_id": "testdb1"},
+  {"id":"host2", "server_id": "testdb1"}
 ]
 ```
 
@@ -45,7 +45,8 @@ Example:
   "id":"host2",
   "path": "/var/lib/postgresql/9.2/main",
   "remote_ssh_cmd": "ssh postgres@host2.sample.com",
-  "recover_job_name": "RecoverJobHost2"
+  "recover_job_name": "RecoverJobHost2",
+  "server_id": "testdb1"
 }
 ```
 
@@ -59,8 +60,8 @@ Example
 
 ```json
 [
-  {"id":"20130318T080002"},
-  {"id":"20130225T192654"}
+  {"id":"20130318T080002", "server_id": "testdb1"},
+  {"id":"20130225T192654", "server_id": "testdb1"}
 ]
 ```
 
@@ -80,7 +81,8 @@ Example
   "backup_start":"2013-03-22 07:25:07 +0100",
   "backup_end":"2013-03-22 07:25:14 +0100",
   "timeline":1,
-  "wal_file_size":973078528
+  "wal_file_size":973078528,
+  "server_id": "testdb1"
 }
 ```
 
