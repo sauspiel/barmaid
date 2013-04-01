@@ -40,20 +40,29 @@ module Barmaid
 
 
     get '/api/servers' do
-      jsonp @config[:servers].keys
+      a = Array.new
+      @config[:servers].keys.each { |s| a << { :id => s } }
+      jsonp a
     end
 
     get '/api/servers/:server_id/targets' do
-      jsonp @config[:servers][params[:server_id].to_sym][:targets].keys
+      a = Array.new
+      @config[:servers][params[:server_id].to_sym][:targets].keys.each { |k| a << { :id => k } }
+      jsonp a
     end
 
     get '/api/servers/:server_id/targets/:target_id' do
-      jsonp @config[:servers][params[:server_id].to_sym][:targets][params[:target_id].to_sym]
+      h = Hash.new
+      h.merge!(@config[:servers][params[:server_id].to_sym][:targets][params[:target_id].to_sym])
+      h[:id] = params[:target_id]
+      jsonp h
     end
 
     get '/api/servers/:server_id/backups' do
       backups = RBarman::Backups.all(params[:server_id])
-      jsonp backups.map { |b| b.id }
+      a = Array.new
+      backups.each { |b| a << { :id => b.id } }
+      jsonp a
     end
 
     get '/api/servers/:server_id/backups/:backup_id' do
@@ -62,11 +71,14 @@ module Barmaid
       %w(size status backup_start backup_end timeline wal_file_size).each do |attr|
         h[attr] = b.send(attr.to_sym)
       end
+      h[:id] = b.id
       jsonp h
     end
 
     get '/api/recover_jobs' do
-      jsonp Resque::Plugins::Status::Hash.statuses.map { |s| s.uuid }
+      a = Array.new
+      Resque::Plugins::Status::Hash.statuses.each { |s| a << { :id => s.uuid } }
+      jsonp a
     end
 
     get '/api/recover_jobs/:job_id' do
@@ -78,6 +90,7 @@ module Barmaid
       h[:pct_complete] = status.pct_complete
       h[:options] = status["options"]
       h[:completed_at] = status["completed_at"] || ""
+      h[:id] = status.uuid
       jsonp h
     end
 
@@ -94,7 +107,7 @@ module Barmaid
       halt(400) if params.empty?
       data = JSON.parse(request.body.read.to_s, :symbolize_names => true)
       job_id = Barmaid::Job::RecoverJob.create(data)
-      jsonp({:job_id => job_id})
+      jsonp({:id => job_id})
     end
   end
 end

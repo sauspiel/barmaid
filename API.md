@@ -12,8 +12,8 @@ Example:
 
 ```json
 [
-  "testdb1",
-  "testdb2"
+  {"id":"testdb1"},
+  {"id":"testdb2"}
 ]
 ```
 
@@ -27,8 +27,8 @@ Example:
 
 ```json
 [
-  "localhost",
-  "127.0.0.1"
+  {"id":"localhost"},
+  {"id":"host2"}
 ]
 ```
 
@@ -38,12 +38,14 @@ Retrieve details for a specific target
 
 Example:
 
-    curl http://localhost:9292/api/servers/testdb1/targets/127.0.0.1
+    curl http://localhost:9292/api/servers/testdb1/targets/host2
 
 ```json
 {
-  "path": "/var/lib/barman/recover/127.0.0.1",
-  "remote_ssh_cmd": "ssh barman@127.0.0.1"
+  "id":"host2",
+  "path": "/var/lib/postgresql/9.2/main",
+  "remote_ssh_cmd": "ssh postgres@host2.sample.com",
+  "recover_job_name": "RecoverJobHost2"
 }
 ```
 
@@ -57,8 +59,8 @@ Example
 
 ```json
 [
-  "20130318T080002",
-  "20130225T192654"
+  {"id":"20130318T080002"},
+  {"id":"20130225T192654"}
 ]
 ```
 
@@ -72,12 +74,13 @@ Example
 
 ```json
 {
-  "size": 19355207,
-  "status": "done",
-  "backup_start": "2013-03-22 07:25:07 +0100",
-  "backup_end": "2013-03-22 07:25:14 +0100",
-  "timeline": 1,
-  "wal_file_size": 973078528
+  "id":"20130322T072507",
+  "size":19355207,
+  "status":"done",
+  "backup_start":"2013-03-22 07:25:07 +0100",
+  "backup_end":"2013-03-22 07:25:14 +0100",
+  "timeline":1,
+  "wal_file_size":973078528
 }
 ```
 
@@ -92,7 +95,7 @@ Example
     
 ```json
 {
-  "job_id": "032d06777b177ffd333631b2ce2c2c8e"
+  "id": "032d06777b177ffd333631b2ce2c2c8e"
 }
 ```
 
@@ -105,7 +108,7 @@ Example
   curl http://localhost:9292/api/recover_jobs
 
 ```json
-["032d06777b177ffd333631b2ce2c2c8e"]
+[{"id":"032d06777b177ffd333631b2ce2c2c8e"}]
 ```
 
 ### GET /api/recover_jobs/id
@@ -118,10 +121,11 @@ Example
 
 ```json
 {
-  "time": 1364395857,
-  "status": "working",
-  "message": "",
-  "pct_complete": 48,
+  "id":"032d06777b177ffd333631b2ce2c2c8e",
+  "time":1364395857,
+  "status":"working",
+  "message":"",
+  "pct_complete":48,
   "options": {
     "server": "testdb1",
     "target": "localhost",
