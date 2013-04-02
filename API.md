@@ -128,11 +128,9 @@ Example
   "status":"working",
   "message":"",
   "pct_complete":48,
-  "options": {
-    "server": "testdb1",
-    "target": "localhost",
-    "backup_id": "20130322T072507"
-  },
+  "server": "testdb1",
+  "target": "localhost",
+  "backup_id": "20130322T072507"
   "completed_at": ""
 }
 ```

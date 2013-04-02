@@ -90,7 +90,9 @@ module Barmaid
       h[:time] = status.time
       h[:message] = status.message || ""
       h[:pct_complete] = status.pct_complete
-      h[:options] = status["options"]
+      h[:server] = status["options"]["server"]
+      h[:target] = status["options"]["target"]
+      h[:backup_id] = status["options"]["backup_id"]
       h[:completed_at] = status["completed_at"] || ""
       h[:id] = status.uuid
       jsonp h
