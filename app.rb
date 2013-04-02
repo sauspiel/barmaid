@@ -21,9 +21,9 @@ module Barmaid
       register Sinatra::Reloader
     end
 
-    before do
-      content_type 'application/json'
-    end
+    #before do
+    #  content_type 'application/json'
+    #end
 
     def initialize
       @config = Barmaid::Config.config
@@ -109,8 +109,7 @@ module Barmaid
 
     post '/api/recover_jobs' do
       halt(400) if params.empty?
-      data = JSON.parse(request.body.read.to_s, :symbolize_names => true)
-      job_id = Barmaid::Job::RecoverJob.create(data)
+      job_id = Barmaid::Job::RecoverJob.create(params)
       jsonp({:id => job_id})
     end
   end

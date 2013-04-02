@@ -92,7 +92,7 @@ Creates a new recover job and recovers the backup to a target
 
 Example
 
-    curl -v -X POST -d '{"server":"testdb1", "target":"localhost", "backup_id": "20130322T072507"}' \
+    curl -v -X POST -d 'server=testdb1&target=localhost&backup_id=20130322T072507' \
     http://localhost:9292/api/recover_jobs
     
 ```json
