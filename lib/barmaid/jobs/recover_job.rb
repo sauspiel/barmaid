@@ -125,7 +125,7 @@ module Barmaid
 
 
       def ssh_connection_options
-        match = @recover_opts[:remote_ssh_cmd].match(/(\w+)@([a-zA-Z|0-9|\.|-|_]*)/)
+        match = @recover_opts[:remote_ssh_cmd].match(/(\w+)@([a-zA-Z|0-9|\.|-]*)/)
         return { :user => match[1], :host => match[2] }
       end
 
