@@ -21,10 +21,6 @@ module Barmaid
       register Sinatra::Reloader
     end
 
-    #before do
-    #  content_type 'application/json'
-    #end
-
     def initialize
       @config = Barmaid::Config.config
       super
@@ -100,11 +96,14 @@ module Barmaid
 
     delete '/api/recover_jobs/:job_id' do
       status = Resque::Plugins::Status::Hash.get(params[:job_id])
+      halt(400) if status.nil?
+
       if status.queued?
-        jsonp Resque::Plugins::Status::Hash.remove(params[:job_id])
+        Resque::Plugins::Status::Hash.remove(params[:job_id])
       elsif status.working?
-        jsonp Resque::Plugins::Status::Hash.kill(params[:job_id])
+        Resque::Plugins::Status::Hash.kill(params[:job_id])
       end
+      status 204
     end
 
     post '/api/recover_jobs' do
