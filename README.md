@@ -1,5 +1,7 @@
 # barmaid
 
+[![Build Status](https://travis-ci.org/sauspiel/barmaid.png?branch=master)](https://travis-ci.org/sauspiel/barmaid)
+
 Provides a restful HTTP api for PostgreSQL backup tool [barman](http://pgbarman.org) to recover backups to several targets (paths or hosts).
 
 ## Requirements
