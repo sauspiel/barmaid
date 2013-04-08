@@ -62,7 +62,7 @@ module Barmaid
     # @param [Hash] opts options hash
     # @option opts [Boolean] :abort_on_error whether an exception should be raised when exit code != 0
     def exec_local(opts = {})
-      sh = Mixlib::ShellOut.new("#{cmd}")
+      sh = Mixlib::ShellOut.new("#{@cmd}")
       sh.timeout = 60 * 60 * 24 # 24hours
       sh.run_command
 
