@@ -184,4 +184,20 @@ describe RecoverJob do
       expect(@job.ssh_session_valid?).to eq(true)
     end
   end
+
+  describe "#exec_command" do
+    it 'should call ShellCommand.exec_local' do
+      ShellCommand.any_instance.stub(:exec_local)
+      ShellCommand.any_instance.should_receive(:exec_local).with({:test => 123})
+      @job.exec_command("/bin/true", {:test => 123})
+    end
+
+    it 'should call ShellCommand.exec_ssh if remote recover' do
+      ShellCommand.any_instance.stub(:exec_ssh)
+      ShellCommand.any_instance.should_receive(:exec_ssh).with('','', nil, {:test => 123})
+      @job.stub(:remote_recover?).and_return(true)
+      @job.stub(:ssh_session_valid?).and_return(true)
+      @job.exec_command("/bin/true", {:test => 123})
+    end
+  end
 end

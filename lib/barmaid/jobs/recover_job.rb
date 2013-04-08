@@ -223,7 +223,7 @@ module Barmaid
         sh = ShellCommand.new(cmd)
         result = nil
         if !remote_recover?
-          result = sh.exec_local(cmd, opts)
+          result = sh.exec_local(opts)
         else
           init_ssh_session if !ssh_session_valid?
           result = sh.exec_ssh('','', @ssh_session, opts)
