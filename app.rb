@@ -98,10 +98,10 @@ module Barmaid
       status = Resque::Plugins::Status::Hash.get(params[:job_id])
       halt(400) if status.nil?
 
-      if status.queued?
-        Resque::Plugins::Status::Hash.remove(params[:job_id])
-      elsif status.working?
+      if status.working?
         Resque::Plugins::Status::Hash.kill(params[:job_id])
+      else
+        Resque::Plugins::Status::Hash.remove(params[:job_id])
       end
       status 204
     end
