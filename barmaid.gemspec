@@ -20,6 +20,8 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "bundler", "~> 1.3"
   spec.add_dependency "rbarman", "~> 0.0.5"
+  spec.add_dependency "grape", "~> 0.4.1"
+  spec.add_dependency "representable", "~> 1.4.0"
   spec.add_dependency "sinatra", "~> 1.4.2"
   spec.add_dependency "sinatra-jsonp"
   spec.add_dependency "resque", "~> 1.23.1"

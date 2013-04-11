@@ -1,3 +1,5 @@
+require "representable/json"
+require "representable/json/collection"
 require "rbarman"
 require "resque"
 require "resque/plugins/status"
@@ -10,6 +12,10 @@ require "barmaid/logger"
 require "barmaid/jobs/recover_job"
 require "barmaid/target"
 require "barmaid/server"
+require "barmaid/servers"
+require "barmaid/representers/server_representer"
+require "barmaid/representers/servers_representer"
+require "barmaid/representers/target_representer"
 
 module Barmaid
 end
