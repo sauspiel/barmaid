@@ -7,7 +7,7 @@ module RBarman
     end
 
     def add_targets
-      return if !Barmaid::Config.config[:servers][id.to_sym]
+      return if Barmaid::Config.config[:servers].nil? || !Barmaid::Config.config[:servers][id.to_sym]
       targets = Barmaid::Config.config[:servers][id.to_sym][:targets]
       if targets
         @targets = Array.new

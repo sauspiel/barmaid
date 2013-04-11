@@ -22,8 +22,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency "rbarman", "~> 0.0.5"
   spec.add_dependency "grape", "~> 0.4.1"
   spec.add_dependency "representable", "~> 1.4.0"
-  spec.add_dependency "sinatra", "~> 1.4.2"
-  spec.add_dependency "sinatra-jsonp"
   spec.add_dependency "resque", "~> 1.23.1"
   spec.add_dependency "resque-status"
   spec.add_dependency "log4r"
@@ -33,5 +31,4 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rake"
   spec.add_development_dependency "rspec", "~> 2.13.0"
   spec.add_development_dependency "rack-test"
-  spec.add_development_dependency "sinatra-reloader"
 end

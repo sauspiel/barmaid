@@ -20,7 +20,14 @@ describe 'Server' do
   end
 
   describe "#add_targets" do
+
     it 'should throw no error if no configuration exists' do
+      Barmaid::Config.config = {}
+      @server.add_targets
+      expect(@server.targets).to eq(nil)
+    end
+
+    it 'should throw no error if no servers configured' do
       Barmaid::Config.config[:servers] = {}
       @server.add_targets
       expect(@server.targets).to eq(nil)
