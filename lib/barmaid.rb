@@ -14,11 +14,11 @@ require "barmaid/target"
 require "barmaid/server"
 require "barmaid/servers"
 require "barmaid/backup"
-require "barmaid/representers/server_representer"
-require "barmaid/representers/servers_representer"
-require "barmaid/representers/target_representer"
 require "barmaid/representers/backup_representer"
 require "barmaid/representers/backups_representer"
+require "barmaid/representers/target_representer"
+require "barmaid/representers/server_representer"
+require "barmaid/representers/servers_representer"
 
 module Barmaid
 end

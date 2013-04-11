@@ -14,12 +14,8 @@ module Barmaid
       property :wals_dir
       property :id
 
-      collection :backups, :class => RBarman::Backup
-    end
-
-    module ServersRepresenter
-      include Representable::JSON::Collection
-      items extend: ServerRepresenter, class: RBarman::Server
+      collection :backups, :class => RBarman::Backup, extend: Barmaid::Representers::BackupRepresenter
+      collection :targets, :class => Barmaid::Target, extend: Barmaid::Representers::TargetRepresenter
     end
   end
 end
