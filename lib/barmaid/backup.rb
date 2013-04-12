@@ -1,5 +1,5 @@
 module RBarman
-  class Server
+  class Backup 
     def server_id
       return @server
     end

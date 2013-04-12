@@ -10,7 +10,7 @@ module Barmaid
       desc 'Return all recover jobs'
       get do
         result = Array.new
-        Resque::Plugins::Status::Hash.statuses.each { |s| a << { :id => s.uuid } }
+        Resque::Plugins::Status::Hash.statuses.each { |s| result << { :id => s.uuid } }
         result
       end
 
@@ -25,12 +25,12 @@ module Barmaid
         {:id => job_id}
       end
 
-      desc 'Return a specific backup'
+      desc 'Return a specific job'
       params do
-        requires :job_id, :type => String, :desc => "Job id"
+        requires :id, :type => String, :desc => "Job id"
       end
-      get ':job_id' do
-        status = Resque::Plugins::Status::Hash.get(params[:job_id])
+      get ':id' do
+        status = Resque::Plugins::Status::Hash.get(params[:id])
         h = Hash.new
         h[:status] = status.status
         h[:time] = status.time
@@ -87,7 +87,7 @@ module Barmaid
       get ":server_id/targets" do
         server = RBarman::Server.by_name(params[:server_id])
         server.add_targets
-        server.targets.extend(Barmaid::Representers::TargetRepresenter)
+        server.targets.extend(Barmaid::Representers::TargetsRepresenter)
       end
 
       desc "Return a target"
@@ -98,7 +98,7 @@ module Barmaid
       get ":server_id/targets/:id" do
         server = RBarman::Server.by_name(params[:server_id])
         server.add_targets
-        target = server.targets.select { |t| t.id == params[:id] }
+        target = server.targets.select { |t| t.id == params[:id] }.first
         raise "Implement me!" if target.nil?
         target.extend(Barmaid::Representers::TargetRepresenter)
       end
@@ -117,8 +117,8 @@ module Barmaid
         requires :server_id, :type => String, :desc => "Server id"
         requires :id, :type => String, :desc => "Backup id"
       end
-      get ":server_id/backups/:backup_id" do
-        backup = RBarman::Backup.by_id(params[:server_id], params[:backup_id])
+      get ":server_id/backups/:id" do
+        backup = RBarman::Backup.by_id(params[:server_id], params[:id])
         backup.extend(Barmaid::Representers::BackupRepresenter)
       end
     end
