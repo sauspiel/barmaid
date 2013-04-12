@@ -130,6 +130,10 @@ describe 'API' do
     it 'should create a new recover job' do
       params = { :server => 'server1', :target => 'target1', :backup_id => '123' }
       Barmaid::Job::RecoverJob.stub!(:create).and_return('2')
+      job = Resque::Plugins::Status::Hash.new
+      job.uuid = '2'
+      job["options"] = params
+      Resque::Plugins::Status::Hash.stub!(:get).with('2').and_return(job)
       post '/api/recover_jobs', params
       expect(last_response.status).to eq(201)
       result = JSON.parse(last_response.body)

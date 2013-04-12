@@ -9,9 +9,8 @@ module Barmaid
     resource :recover_jobs do
       desc 'Return all recover jobs'
       get do
-        result = Array.new
-        Resque::Plugins::Status::Hash.statuses.each { |s| result << { :id => s.uuid } }
-        result
+        statuses = RecoverJobStatuses.new(Resque::Plugins::Status::Hash.statuses)
+        statuses.extend(Barmaid::Representers::RecoverJobStatusesRepresenter)
       end
 
       desc 'Create a new recover job'
@@ -22,7 +21,8 @@ module Barmaid
       end
       post do
         job_id = Barmaid::Job::RecoverJob.create(params)
-        {:id => job_id}
+        job_status = RecoverJobStatus.create(Resque::Plugins::Status::Hash.get(job_id))
+        job_status.extend(Barmaid::Representers::RecoverJobStatusRepresenter)
       end
 
       desc 'Return a specific job'
@@ -31,31 +31,24 @@ module Barmaid
       end
       get ':id' do
         status = Resque::Plugins::Status::Hash.get(params[:id])
-        h = Hash.new
-        h[:status] = status.status
-        h[:time] = status.time
-        h[:message] = status.message || ""
-        h[:pct_complete] = status.pct_complete
-        h[:server] = status["options"]["server"]
-        h[:target] = status["options"]["target"]
-        h[:backup_id] = status["options"]["backup_id"]
-        h[:completed_at] = status["completed_at"] || ""
-        h[:id] = status.uuid
-        h
+        error! "Job not found", 400 if status.nil?
+
+        job_status = RecoverJobStatus.create(status)
+        job_status.extend(Barmaid::Representers::RecoverJobStatusRepresenter)
       end
 
       desc 'Delete a backup'
       params do
-        requires :job_id, :type => String, :desc => "Job id"
+        requires :id, :type => String, :desc => "Job id"
       end
-      delete ':job_id' do
-        status = Resque::Plugins::Status::Hash.get(params[:job_id])
-        error! "Job not found", 400
+      delete ':id' do
+        status = Resque::Plugins::Status::Hash.get(params[:id])
+        error! "Job not found", 400 if status.nil?
 
         if status.working?
-          Resque::Plugins::Status::Hash.kill(params[:job_id])
+          Resque::Plugins::Status::Hash.kill(params[:id])
         else
-          Resque::Plugins::Status::Hash.remove(params[:job_id])
+          Resque::Plugins::Status::Hash.remove(params[:id])
         end
         status 204
       end
