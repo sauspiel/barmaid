@@ -5,12 +5,9 @@ module Barmaid
 
       property :backup_start
       property :backup_end
-      property :begin_wal
-      property :end_wal
-      property :server_id
       property :id
       property :pgdata
-      property :server
+      property :server, as: :server_id
       property :size
       property :status
       property :timeline
