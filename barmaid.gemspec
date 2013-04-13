@@ -19,7 +19,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "bundler", "~> 1.3"
-  spec.add_dependency "rbarman", "~> 0.0.5"
+  spec.add_dependency "rbarman", "~> 0.0.6"
   spec.add_dependency "grape", "~> 0.4.1"
   spec.add_dependency "representable", "~> 1.4.0"
   spec.add_dependency "resque", "~> 1.23.1"
