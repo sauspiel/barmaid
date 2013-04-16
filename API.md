@@ -10,11 +10,42 @@ Example:
 
     curl http://localhost:9292/api/servers
 
+
+(shortened)
+
 ```json
 [
-  {"id":"testdb1"},
-  {"id":"testdb2"}
+  {"id":"testdb1", "pg_conn_ok":true, "active":true, "targets":["..."], "backups":["..."]},
+  {"id":"testdb2", "pg_conn_ok":true, "active":true, "targets":["..."], "backups":["..."]}
 ]
+```
+
+### GET /api/servers/id
+
+Retrieve a specific server
+
+Example:
+
+  curl http://localhost:9292/api/server/testdb1
+
+
+(shortened)
+
+```json
+{
+  "active": true,
+  "backup_dir": "\/var\/lib\/barman\/testdb1",
+  "base_backups_dir": "\/var\/lib\/barman\/testdb1\/base",
+  "conn_info": "host=10.20.20.4 user=postgres port=5432",
+  "name": "testdb1",
+  "pg_conn_ok": true,
+  "ssh_check_ok": true,
+  "ssh_cmd": "ssh postgres@10.20.20.4",
+  "wals_dir": "\/var\/lib\/barman\/testdb1\/wals",
+  "id": "testdb1",
+  "backups": ["..."],
+  "targets": ["..."]
+}
 ```
 
 ### GET /api/servers/id/targets
@@ -25,10 +56,13 @@ Example:
 
     curl -H http://localhost:9292/api/servers/testdb1/targets
 
+
+(shortened)
+
 ```json
 [
-  {"id":"localhost", "server_id": "testdb1"},
-  {"id":"host2", "server_id": "testdb1"}
+  {"id":"localhost", "server_id": "testdb1", "path":"/var/lib/barmand/recover"},
+  {"id":"host2", "server_id": "testdb1", "path":"/var/lib/postgresql/9.2/main"}
 ]
 ```
 
@@ -58,10 +92,13 @@ Example
   
     curl http://localhost:9292/api/servers/testdb1/backups
 
+
+(shortened)
+
 ```json
 [
-  {"id":"20130318T080002", "server_id": "testdb1"},
-  {"id":"20130225T192654", "server_id": "testdb1"}
+  {"id":"20130318T080002", "server_id": "testdb1", "status":"done"},
+  {"id":"20130225T192654", "server_id": "testdb1", "status":"failed"}
 ]
 ```
 
@@ -97,7 +134,15 @@ Example
     
 ```json
 {
-  "id": "032d06777b177ffd333631b2ce2c2c8e"
+  "status": "queued",
+  "time": "2013-04-16 12:57:08 +0200",
+  "message": "",
+  "pct_complete": 0,
+  "server": "testdb1",
+  "target": "localhost",
+  "backup_id": "20130322T072507",
+  "completed_at": "",
+  "id": "65d15077f2d0d1256ce25aabcf113aef"
 }
 ```
 
@@ -109,8 +154,14 @@ Example
 
   curl http://localhost:9292/api/recover_jobs
 
+
+(shortened)
+
 ```json
-[{"id":"032d06777b177ffd333631b2ce2c2c8e"}]
+[
+ {"id":"032d06777b177ffd333631b2ce2c2c8e", "status":"completed"},
+ {"id":"e25b5485d98a94768e6598d290702a17", "status":"failed"},
+]
 ```
 
 ### GET /api/recover_jobs/id
