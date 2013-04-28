@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + "/../api.rb"
+require File.dirname(__FILE__) + "/../lib/barmaid/api.rb"
 require 'rspec'
 require 'rack/test'
 

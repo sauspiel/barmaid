@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = Barmaid::VERSION
   spec.authors       = ["Holger Amann"]
   spec.email         = ["holger@sauspiel.de"]
-  spec.description   = %q{Web Application for providing an API for 2ndQuadrant's PostgreSQL backup tool 'barman'}
-  spec.summary       =  %q{Web Application for providing an API for 2ndQuadrant's PostgreSQL backup tool 'barman'}
+  spec.description   = %q{restful HTTP api for 2ndQuadrant's PostgreSQL backup tool 'barman'}
+  spec.summary       = %q{restful HTTP api for 2ndQuadrant's PostgreSQL backup tool 'barman'}
   spec.homepage      = "https://github.com/sauspiel/barmaid"
   spec.license       = "MIT"
 
