@@ -8,7 +8,6 @@ Provides a restful HTTP api for PostgreSQL backup tool [barman](http://pgbarman.
 
 [Ruby](http://www.ruby-lang.org/en/downloads), a working [barman](http://pgbarman.org) installation and [redis](http://redis.io) for its job queues, so you need a minimal redis server somewhere before you start. If you don't have one, executing [these](http://redis.io/download) steps should be sufficent.
 
-
 ## Installation
 
 barmaid has to be installed and run as the same user as barman (default 'barman'), otherwise it won't have access to your backups. So consider to do all steps as 'barman' user.
@@ -17,6 +16,7 @@ barmaid has to be installed and run as the same user as barman (default 'barman'
 
 ### From Source
 
+    $ sudo apt-get install libxml2-dev libxslt1-dev
     $ git clone https://github.com/sauspiel/barmaid.git
     $ cd barmaid && bundle install --path vendor/bundle --binstubs
 
@@ -24,6 +24,7 @@ barmaid has to be installed and run as the same user as barman (default 'barman'
 
 Note: barmaid isn't released as gem yet, so please install from source!
 
+    $ sudo apt-get install libxml2-dev libxslt1-dev
     $ mkdir barmaid && cd barmaid
     
 Create a 'Gemfile' with the following content
