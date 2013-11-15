@@ -82,7 +82,7 @@ module Barmaid
         new_opts = Hash.new
         new_opts.merge!(params)
         new_opts[:recover_opts] = {} if new_opts[:recover_opts].nil?
-        new_opts[:recover_opts][:remote_ssh_cmd] = target[:remote_ssh_cmd] if target[:remote_ssh_cmd]
+        new_opts[:recover_opts].merge!(target)
         if target[:recover_job_name]
           log.info("Trying to instantiate #{target[:recover_job_name]}")
           job = Object.const_get(target[:recover_job_name]).new(uuid, new_opts)
