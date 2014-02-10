@@ -18,14 +18,13 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "bundler", "~> 1.3"
-  spec.add_dependency "rbarman", "~> 0.0.10"
+  spec.add_dependency "rbarman", "~> 0.0.12"
   spec.add_dependency "grape", "~> 0.6.1"
   spec.add_dependency "representable", "~> 1.4.0"
   spec.add_dependency "resque", "~> 1.23.1"
   spec.add_dependency "resque-status"
   spec.add_dependency "log4r"
-  spec.add_dependency "mixlib-shellout", "~> 1.1.0"
+  spec.add_dependency "mixlib-shellout", "~> 1.3.0"
   spec.add_dependency "net-ssh"
   spec.add_dependency "unicorn"
   spec.add_development_dependency "rake"
